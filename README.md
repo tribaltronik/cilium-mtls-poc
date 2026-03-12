@@ -2,6 +2,9 @@
 
 PoC demonstrating service mesh with mutual TLS using Cilium on local Kind cluster.
 
+
+![Alt Text](docs/architecture.png)
+
 ## Prerequisites
 
 - Docker or Colima
