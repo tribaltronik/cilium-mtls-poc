@@ -79,11 +79,14 @@ kubectl run test --image=curlimages/curl --rm -it --restart=Never -- curl -s htt
 ### Check Hubble Flows
 
 ```bash
-# Port-forward Hubble UI
-cilium hubble ui &
+# Port-forward Hubble Relay (run in background)
+cilium hubble port-forward &
 
-# Or use CLI
-cilium hubble observe --from-pod default/nginx-xxx
+# Observe flows from a pod (use hubble CLI, not cilium)
+hubble observe --from-pod default/nginx-xxx --last 10
+
+# Or open Hubble UI
+cilium hubble ui
 ```
 
 ### Verify Encryption

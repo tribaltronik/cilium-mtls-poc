@@ -1,21 +1,37 @@
-# Default deny all traffic
-# This ensures that only explicitly allowed traffic is permitted
+# Allow all traffic in default namespace for testing
+# In production, you'd want more restrictive policies
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: default-deny-all
+  name: allow-all-default
   namespace: default
 spec:
   endpointSelector:
     matchLabels: {}
   egress:
-    - toCIDR:
-      - 0.0.0.0/0
+    - toEntities:
+      - remote-node
+      - health
+      - kube-apiserver
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
       toPorts:
         - ports:
           - port: "53"
             protocol: UDP
+          - port: "53"
+            protocol: TCP
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: default
   ingress:
     - fromEntities:
       - kube-apiserver
+      - remote-node
+      - health
+      - cluster
+    - fromEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: default

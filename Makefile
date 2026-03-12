@@ -1,4 +1,4 @@
-.PHONY: help setup setup2 cluster cilium cilium-encrypt hubble cert-manager network-policies status encrypt-status test clean
+.PHONY: help setup setup2 cluster cilium cilium-encrypt hubble hubble-port-forward cert-manager network-policies status encrypt-status test clean
 
 help:
 	@echo "Cilium mTLS PoC - Makefile"
@@ -12,6 +12,7 @@ help:
 	@echo "  make setup2      - Full Phase 2: encryption + Hubble + cert-manager"
 	@echo "  make cilium-encrypt - Enable WireGuard encryption"
 	@echo "  make hubble      - Enable Hubble observability"
+	@echo "  make hubble-port-forward - Port-forward Hubble Relay"
 	@echo "  make cert-manager - Install cert-manager"
 	@echo "  make network-policies - Apply network policies"
 	@echo ""
@@ -70,6 +71,10 @@ status:
 encrypt-status:
 	@echo "Checking WireGuard encryption..."
 	@kubectl exec -n kube-system $$(kubectl get pods -n kube-system -l k8s-app=cilium -o jsonpath='{.items[0].metadata.name}') -- cilium encrypt status
+
+hubble-port-forward:
+	@echo "Port-forwarding Hubble Relay..."
+	@cilium hubble port-forward
 
 test:
 	@echo "Running Cilium connectivity test..."
