@@ -1,0 +1,35 @@
+# Cilium Helm values for mTLS PoC
+# Phase 2: Encryption and Observability
+
+encryption:
+  enabled: true
+  type: WireGuard
+  wireguard:
+    forceLinuxKernelModule: false
+
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+      hosts:
+        - hubble-ui.local
+      tls: []
+
+operator:
+  replicas: 1
+
+eni:
+  enabled: false
+
+egressMasqueradeEnabled: true
+
+ipam:
+  mode: cluster-pool
+  clusterPool:
+    podCIDR: 10.244.0.0/16

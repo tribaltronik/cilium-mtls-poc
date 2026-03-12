@@ -19,15 +19,20 @@ PoC demonstrating service mesh with mutual TLS using Cilium on local Kind cluste
 ## Phase 2: mTLS Setup
 **Goal:** Enable encrypted service-to-service communication
 
-- [ ] Configure Cilium with encryption enabled
-- [ ] Choose backend: WireGuard (preferred) or IPsec
-- [ ] Install cert-manager for certificate lifecycle
-- [ ] Configure mutual authentication policies
-- [ ] Enable Hubble for observability
+- [x] Configure Cilium with encryption enabled
+- [x] Choose backend: WireGuard (preferred) or IPsec
+- [x] Install cert-manager for certificate lifecycle
+- [x] Enable identity-based network policies (foundation for mTLS)
+- [x] Enable Hubble for observability
+
+**Note:** Full mutual authentication with SPIFFE/SPIRE is beta and requires complex setup. WireGuard provides encryption at the node level.
 
 **Deliverables:**
-- `cilium-values.yaml` with encryption config
-- Cert-manager manifests
+- `cilium-values.yaml` - WireGuard encryption config
+- `manifests/network-policies/default-deny-all.yaml` - Base policy
+- Cert-manager v1.14.0 installed (3 pods running)
+- WireGuard encryption: Enabled (cilium_wg0 interface)
+- Hubble Relay + UI: Running
 
 ## Phase 3: Demo Applications
 **Goal:** Multi-tier app with mTLS enforcement

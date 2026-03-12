@@ -1,17 +1,31 @@
-.PHONY: help setup cluster cilium status test clean
+.PHONY: help setup setup2 cluster cilium cilium-encrypt hubble cert-manager network-policies status encrypt-status test clean
 
 help:
 	@echo "Cilium mTLS PoC - Makefile"
 	@echo ""
-	@echo "Targets:"
-	@echo "  setup     - Full Phase 1 setup: start colima + create cluster + install Cilium"
-	@echo "  cluster   - Create Kind cluster only"
-	@echo "  cilium   - Install Cilium on existing cluster"
-	@echo "  status   - Check Cilium status"
-	@echo "  test     - Run Cilium connectivity test"
-	@echo "  clean    - Delete Kind cluster"
+	@echo "Phase 1 - Foundation:"
+	@echo "  make setup       - Full Phase 1: cluster + Cilium"
+	@echo "  make cluster     - Create Kind cluster"
+	@echo "  make cilium      - Install Cilium"
+	@echo ""
+	@echo "Phase 2 - mTLS Setup:"
+	@echo "  make setup2      - Full Phase 2: encryption + Hubble + cert-manager"
+	@echo "  make cilium-encrypt - Enable WireGuard encryption"
+	@echo "  make hubble      - Enable Hubble observability"
+	@echo "  make cert-manager - Install cert-manager"
+	@echo "  make network-policies - Apply network policies"
+	@echo ""
+	@echo "Utilities:"
+	@echo "  make status       - Check Cilium status"
+	@echo "  make encrypt-status - Check WireGuard encryption"
+	@echo "  make test        - Run connectivity test"
+	@echo "  make clean       - Delete cluster"
 
 setup: cluster cilium status
+	@echo "Phase 1 complete!"
+
+setup2: cilium-encrypt hubble cert-manager network-policies
+	@echo "Phase 2 complete!"
 
 cluster:
 	@echo "Creating Kind cluster..."
@@ -21,13 +35,41 @@ cluster:
 cilium:
 	@echo "Installing Cilium..."
 	@cilium install --version 1.14.6
-	@echo "Waiting for Cilium to be ready..."
+	@echo "Waiting for Cilium..."
 	@sleep 30
 	@kubectl wait --for=condition=ready pod -l k8s-app=cilium -n kube-system --timeout=120s || true
+
+cilium-encrypt:
+	@echo "Upgrading Cilium with encryption..."
+	@helm upgrade cilium cilium/cilium --version 1.14.6 -n kube-system -f cilium-values.yaml
+	@echo "Enabling WireGuard..."
+	@cilium config set enable-wireguard true
+	@echo "WireGuard encryption enabled"
+
+hubble:
+	@echo "Enabling Hubble..."
+	@cilium hubble enable --relay=true --ui=true
+	@echo "Hubble enabled"
+
+cert-manager:
+	@echo "Installing cert-manager..."
+	@kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.0/cert-manager.yaml
+	@kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=120s
+	@echo "cert-manager installed"
+
+network-policies:
+	@echo "Applying network policies..."
+	@mkdir -p manifests/network-policies
+	@kubectl apply -f manifests/network-policies/
+	@echo "Network policies applied"
 
 status:
 	@echo "Checking Cilium status..."
 	@cilium status
+
+encrypt-status:
+	@echo "Checking WireGuard encryption..."
+	@kubectl exec -n kube-system $$(kubectl get pods -n kube-system -l k8s-app=cilium -o jsonpath='{.items[0].metadata.name}') -- cilium encrypt status
 
 test:
 	@echo "Running Cilium connectivity test..."
