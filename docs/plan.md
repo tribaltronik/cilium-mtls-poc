@@ -6,14 +6,15 @@ PoC demonstrating service mesh with mutual TLS using Cilium on local Kind cluste
 ## Phase 1: Foundation
 **Goal:** Working Kind cluster with Cilium CNI
 
-- [ ] Create `kind-config.yaml` with multi-node setup (1 control, 2 workers)
-- [ ] Disable default CNI in Kind config
-- [ ] Install Cilium CLI (`cilium install`)
-- [ ] Verify: `cilium status`, `cilium connectivity test`
+- [x] Create `kind-config.yaml` with multi-node setup (1 control, 2 workers)
+- [x] Disable default CNI in Kind config
+- [x] Install Cilium CLI (`cilium install`)
+- [x] Verify: `cilium status`, `cilium connectivity test`
 
 **Deliverables:**
-- `kind-config.yaml`
-- Cluster validation output
+- `kind-config.yaml` - Multi-node Kind cluster config
+- `Makefile` - Automation for setup/teardown
+- Cluster validation: 3 nodes ready, Cilium 3/3
 
 ## Phase 2: mTLS Setup
 **Goal:** Enable encrypted service-to-service communication
