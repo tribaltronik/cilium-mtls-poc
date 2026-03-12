@@ -1,0 +1,121 @@
+# L7 CiliumNetworkPolicies for demo app
+# This demonstrates L7 (HTTP) filtering
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: backend-l7-policy
+  namespace: default
+spec:
+  description: "Backend L7 policy: restrict HTTP methods"
+  endpointSelector:
+    matchLabels:
+      app: backend
+  ingress:
+    - fromEndpoints:
+      - matchLabels:
+          app: middleware
+      toPorts:
+        - ports:
+          - port: "8080"
+            protocol: TCP
+          rules:
+            http:
+              - method: "GET"
+              - method: "POST"
+  egress:
+    - toEntities:
+      - kube-apiserver
+      - remote-node
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+          - port: "53"
+            protocol: UDP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: middleware-l7-policy
+  namespace: default
+spec:
+  description: "Middleware L7 policy: restrict HTTP methods"
+  endpointSelector:
+    matchLabels:
+      app: middleware
+  ingress:
+    - fromEndpoints:
+      - matchLabels:
+          app: frontend
+      toPorts:
+        - ports:
+          - port: "8080"
+            protocol: TCP
+          rules:
+            http:
+              - method: "GET"
+              - method: "POST"
+  egress:
+    - toEndpoints:
+      - matchLabels:
+          app: backend
+      toPorts:
+        - ports:
+          - port: "8080"
+            protocol: TCP
+          rules:
+            http:
+              - method: "GET"
+    - toEntities:
+      - kube-apiserver
+      - remote-node
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+          - port: "53"
+            protocol: UDP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: frontend-l7-policy
+  namespace: default
+spec:
+  description: "Frontend L7 policy: allow GET requests"
+  endpointSelector:
+    matchLabels:
+      app: frontend
+  ingress:
+    - fromEntities:
+      - kube-apiserver
+      - remote-node
+      - host
+      - cluster
+  egress:
+    - toEndpoints:
+      - matchLabels:
+          app: middleware
+      toPorts:
+        - ports:
+          - port: "8080"
+            protocol: TCP
+          rules:
+            http:
+              - method: "GET"
+    - toEntities:
+      - kube-apiserver
+      - remote-node
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+          - port: "53"
+            protocol: UDP

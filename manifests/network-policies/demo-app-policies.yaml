@@ -1,0 +1,106 @@
+# Network policies for 3-tier demo app
+# Frontend -> Middleware -> Backend
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: backend-policy
+  namespace: default
+spec:
+  description: "Backend: allow ingress from middleware, allow DNS egress"
+  endpointSelector:
+    matchLabels:
+      app: backend
+  ingress:
+    - fromEndpoints:
+      - matchLabels:
+          app: middleware
+      toPorts:
+        - ports:
+          - port: "8080"
+            protocol: TCP
+  egress:
+    - toEntities:
+      - kube-apiserver
+      - remote-node
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+          - port: "53"
+            protocol: UDP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: middleware-policy
+  namespace: default
+spec:
+  description: "Middleware: allow ingress from frontend, allow egress to backend and DNS"
+  endpointSelector:
+    matchLabels:
+      app: middleware
+  ingress:
+    - fromEndpoints:
+      - matchLabels:
+          app: frontend
+      toPorts:
+        - ports:
+          - port: "8080"
+            protocol: TCP
+  egress:
+    - toEndpoints:
+      - matchLabels:
+          app: backend
+      toPorts:
+        - ports:
+          - port: "8080"
+            protocol: TCP
+    - toEntities:
+      - kube-apiserver
+      - remote-node
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+          - port: "53"
+            protocol: UDP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: frontend-policy
+  namespace: default
+spec:
+  description: "Frontend: allow ingress from ingress-controller or world, allow egress to middleware and DNS"
+  endpointSelector:
+    matchLabels:
+      app: frontend
+  ingress:
+    - fromEntities:
+      - kube-apiserver
+      - remote-node
+      - host
+  egress:
+    - toEndpoints:
+      - matchLabels:
+          app: middleware
+      toPorts:
+        - ports:
+          - port: "8080"
+            protocol: TCP
+    - toEntities:
+      - kube-apiserver
+      - remote-node
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+          - port: "53"
+            protocol: UDP

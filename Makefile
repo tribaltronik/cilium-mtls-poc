@@ -1,4 +1,4 @@
-.PHONY: help setup setup2 cluster cilium cilium-encrypt hubble hubble-port-forward cert-manager network-policies status encrypt-status test clean
+.PHONY: help setup setup2 setup3 cluster cilium cilium-encrypt hubble hubble-port-forward cert-manager network-policies demo-apps status encrypt-status test clean
 
 help:
 	@echo "Cilium mTLS PoC - Makefile"
@@ -16,6 +16,10 @@ help:
 	@echo "  make cert-manager - Install cert-manager"
 	@echo "  make network-policies - Apply network policies"
 	@echo ""
+	@echo "Phase 3 - Demo Apps:"
+	@echo "  make setup3      - Full Phase 3: demo apps + policies"
+	@echo "  make demo-apps   - Deploy demo applications"
+	@echo ""
 	@echo "Utilities:"
 	@echo "  make status       - Check Cilium status"
 	@echo "  make encrypt-status - Check WireGuard encryption"
@@ -27,6 +31,9 @@ setup: cluster cilium status
 
 setup2: cilium-encrypt hubble cert-manager network-policies
 	@echo "Phase 2 complete!"
+
+setup3: demo-apps
+	@echo "Phase 3 complete!"
 
 cluster:
 	@echo "Creating Kind cluster..."
@@ -63,6 +70,14 @@ network-policies:
 	@mkdir -p manifests/network-policies
 	@kubectl apply -f manifests/network-policies/
 	@echo "Network policies applied"
+
+demo-apps:
+	@echo "Deploying demo applications..."
+	@mkdir -p manifests/demo-apps
+	@kubectl apply -f manifests/demo-apps/
+	@echo "Demo applications deployed"
+	@echo "Testing connectivity..."
+	@kubectl run test-demo --image=curlimages/curl --rm -it --restart=Never -- sh -c "curl -s http://frontend.default.svc.cluster.local:8080" || true
 
 status:
 	@echo "Checking Cilium status..."

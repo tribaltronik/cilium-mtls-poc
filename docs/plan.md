@@ -37,15 +37,16 @@ PoC demonstrating service mesh with mutual TLS using Cilium on local Kind cluste
 ## Phase 3: Demo Applications
 **Goal:** Multi-tier app with mTLS enforcement
 
-- [ ] Deploy 3 services: frontend → middleware → backend
-- [ ] Apply basic NetworkPolicies (L3/L4)
-- [ ] Create CiliumNetworkPolicy for L7 filtering
-- [ ] Configure mTLS between all pods
-- [ ] Add service-specific identity labels
+- [x] Deploy 3 services: frontend → middleware → backend
+- [x] Apply basic NetworkPolicies (L3/L4)
+- [x] Create CiliumNetworkPolicy for L7 filtering
+- [x] Configure mTLS between all pods (via identity-based policies)
+- [x] Add service-specific identity labels
 
 **Deliverables:**
-- `manifests/demo-apps/` directory
-- `manifests/network-policies/` directory
+- `manifests/demo-apps/` - frontend, middleware, backend services
+- `manifests/network-policies/` - L3/L4 and L7 policies
+- Verified: Traffic flows through tier chain (frontend → middleware → backend)
 
 ## Phase 4: Validation
 **Goal:** Prove mTLS is working

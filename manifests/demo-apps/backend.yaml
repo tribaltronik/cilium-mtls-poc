@@ -1,0 +1,46 @@
+# Backend service - Returns simple responses
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: default
+  labels:
+    app: backend
+    tier: backend
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  selector:
+    app: backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: default
+  labels:
+    app: backend
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+        tier: backend
+    spec:
+      containers:
+        - name: backend
+          image: hashicorp/http-echo:latest
+          args:
+            - "-text=Hello from Backend!"
+            - "-listen=:8080"
+          ports:
+            - containerPort: 8080
+              name: http
