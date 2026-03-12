@@ -1,4 +1,4 @@
-.PHONY: help setup setup2 setup3 cluster cilium cilium-encrypt hubble hubble-port-forward cert-manager network-policies demo-apps status encrypt-status test clean
+.PHONY: help setup setup2 setup3 cluster cilium cilium-encrypt hubble hubble-port-forward cert-manager network-policies demo-apps status encrypt-status validate test clean
 
 help:
 	@echo "Cilium mTLS PoC - Makefile"
@@ -20,9 +20,13 @@ help:
 	@echo "  make setup3      - Full Phase 3: demo apps + policies"
 	@echo "  make demo-apps   - Deploy demo applications"
 	@echo ""
+	@echo "Phase 4 - Validation:"
+	@echo "  make validate    - Run validation script"
+	@echo ""
 	@echo "Utilities:"
 	@echo "  make status       - Check Cilium status"
 	@echo "  make encrypt-status - Check WireGuard encryption"
+	@echo "  make hubble-port-forward - Port-forward Hubble"
 	@echo "  make test        - Run connectivity test"
 	@echo "  make clean       - Delete cluster"
 
@@ -90,6 +94,10 @@ encrypt-status:
 hubble-port-forward:
 	@echo "Port-forwarding Hubble Relay..."
 	@cilium hubble port-forward
+
+validate:
+	@echo "Running validation script..."
+	@./scripts/validate.sh
 
 test:
 	@echo "Running Cilium connectivity test..."
