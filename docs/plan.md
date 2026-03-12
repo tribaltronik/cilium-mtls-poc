@@ -63,17 +63,17 @@ PoC demonstrating service mesh with mutual TLS using Cilium on local Kind cluste
 ## Phase 5: Automation
 **Goal:** One-command setup/teardown
 
-- [ ] Create Makefile with targets:
+- [x] Create Makefile with targets:
   - `make setup` - create cluster + install Cilium
   - `make deploy` - deploy demo apps
   - `make verify` - run validation tests
   - `make clean` - teardown everything
-- [ ] Write comprehensive README
+- [x] Write comprehensive README
 
 **Deliverables:**
-- `Makefile`
-- `README.md`
-- Architecture diagram
+- `Makefile` - Full automation with 20+ targets
+- `README.md` - Comprehensive documentation
+- `docs/architecture.png` - Architecture diagram
 
 ## Project Structure
 ```

@@ -1,34 +1,29 @@
-.PHONY: help setup setup2 setup3 cluster cilium cilium-encrypt hubble hubble-port-forward cert-manager network-policies demo-apps status encrypt-status validate test clean
+.PHONY: help all setup setup2 setup3 cluster cilium cilium-encrypt hubble hubble-port-forward cert-manager network-policies demo-apps deploy status encrypt-status validate verify test clean
 
 help:
 	@echo "Cilium mTLS PoC - Makefile"
 	@echo ""
-	@echo "Phase 1 - Foundation:"
-	@echo "  make setup       - Full Phase 1: cluster + Cilium"
-	@echo "  make cluster     - Create Kind cluster"
-	@echo "  make cilium      - Install Cilium"
+	@echo "Quick Start:"
+	@echo "  make all         - Full setup (Phases 1-3) + validate"
+	@echo "  make setup       - Phase 1: cluster + Cilium"
+	@echo "  make setup2     - Phase 2: encryption + Hubble + cert-manager"
+	@echo "  make setup3     - Phase 3: demo apps"
 	@echo ""
-	@echo "Phase 2 - mTLS Setup:"
-	@echo "  make setup2      - Full Phase 2: encryption + Hubble + cert-manager"
-	@echo "  make cilium-encrypt - Enable WireGuard encryption"
-	@echo "  make hubble      - Enable Hubble observability"
-	@echo "  make hubble-port-forward - Port-forward Hubble Relay"
-	@echo "  make cert-manager - Install cert-manager"
-	@echo "  make network-policies - Apply network policies"
-	@echo ""
-	@echo "Phase 3 - Demo Apps:"
-	@echo "  make setup3      - Full Phase 3: demo apps + policies"
-	@echo "  make demo-apps   - Deploy demo applications"
-	@echo ""
-	@echo "Phase 4 - Validation:"
-	@echo "  make validate    - Run validation script"
+	@echo "Individual Targets:"
+	@echo "  make cluster          - Create Kind cluster"
+	@echo "  make cilium           - Install Cilium"
+	@echo "  make cilium-encrypt  - Enable WireGuard"
+	@echo "  make hubble           - Enable Hubble"
+	@echo "  make cert-manager     - Install cert-manager"
+	@echo "  make demo-apps       - Deploy demo apps"
 	@echo ""
 	@echo "Utilities:"
-	@echo "  make status       - Check Cilium status"
-	@echo "  make encrypt-status - Check WireGuard encryption"
-	@echo "  make hubble-port-forward - Port-forward Hubble"
-	@echo "  make test        - Run connectivity test"
-	@echo "  make clean       - Delete cluster"
+	@echo "  make deploy     - Alias for demo-apps"
+	@echo "  make verify    - Alias for validate"
+	@echo "  make status    - Check Cilium status"
+	@echo "  make encrypt-status - Check WireGuard"
+	@echo "  make validate  - Run validation"
+	@echo "  make clean     - Delete cluster"
 
 setup: cluster cilium status
 	@echo "Phase 1 complete!"
@@ -38,6 +33,22 @@ setup2: cilium-encrypt hubble cert-manager network-policies
 
 setup3: demo-apps
 	@echo "Phase 3 complete!"
+
+all: setup setup2 setup3 validate
+	@echo ""
+	@echo "======================================"
+	@echo "  Cilium mTLS PoC - Fully Deployed!"
+	@echo "======================================"
+	@echo ""
+	@echo "Run 'make status' to check status"
+	@echo "Run 'make hubble-port-forward' then open Hubble UI"
+	@echo "Run 'make clean' to teardown"
+
+deploy: demo-apps
+	@echo "Demo apps deployed!"
+
+verify: validate
+	@echo "Verification complete!"
 
 cluster:
 	@echo "Creating Kind cluster..."
